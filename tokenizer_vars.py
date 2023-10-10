@@ -11,10 +11,11 @@ def getTokenizer():
     # tempNewTokens.append("<unknown>")
     # new_tokens = list(set(tempNewTokens) - set(tokenizer.get_vocab().keys()))
     # tokenizer.add_tokens(new_tokens)
+    number_of_recipes = c.NUMBER_OF_RECIPES
 
     tokenizer = ByteLevelBPETokenizer(
-        "tokenizers/chef_tokenizer-vocab.json",
-        "tokenizers/chef_tokenizer-merges.txt",
+        f"tokenizers/chef_tokenizer_{number_of_recipes}-vocab.json",
+        f"tokenizers/chef_tokenizer_{number_of_recipes}-merges.txt",
     )
 
     tokenizer.add_tokens(c.NEW_TOKENS_NO_SPACES)

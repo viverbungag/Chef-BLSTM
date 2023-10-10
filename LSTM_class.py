@@ -6,8 +6,8 @@ import tokenizer_vars as tv
 
 
 class Sequences:
-    def __init__(self, text_object, max_len, step):
-        self.tokens_ind = text_object.tokens_ind
+    def __init__(self, tokens_ind, max_len, step):
+        self.tokens_ind = tokens_ind
         self.max_len = max_len
         self.step = step
         self.sequences, self.next_words = self.create_sequences()
@@ -34,21 +34,23 @@ class Sequences:
 
 
 class ModelPredict:
-    def __init__(self, model, prefix, token2ind, ind2token, max_len, embedding=False):
+    def __init__(
+        self, model, tokens_ind_prefix, input_prefix, max_len, embedding=False
+    ):
         self.tokenizer = tv.getTokenizer()
         self.model = model
-        self.token2ind, self.ind2token = token2ind, ind2token
         self.max_len = max_len
-        self.prefix = prefix
-        self.tokens_ind = prefix.tokens_ind.copy()
+        self.input_prefix = input_prefix
+        self.original_tokens_ind = tokens_ind_prefix.copy()
+        self.tokens_ind = tokens_ind_prefix.copy()
         self.embedding = embedding
 
     def __repr__(self):
-        return self.prefix.content
+        return self.input_prefix
 
     def single_data_generation(self):
         single_sequence = np.zeros(
-            (1, self.max_len, len(self.token2ind)), dtype=np.bool
+            (1, self.max_len, len(tokenizer.get_vocab_size())), dtype=np.bool
         )
         prefix = self.tokens_ind[-self.max_len :]
 
@@ -78,7 +80,7 @@ class ModelPredict:
         text_reverse = re.sub(" +", " ", text_reverse)
         return text_reverse
 
-    def return_next_word(self, temperature=1, as_word=False):
+    def return_next_word(self, temperature=1):
         prob = self.model_predict()
 
         prob_with_temperature = self.add_prob_temperature(prob, temperature)
@@ -86,24 +88,17 @@ class ModelPredict:
             len(prob_with_temperature), p=prob_with_temperature
         )
 
-        if as_word:
-            return self.ind2token[next_word]
-        else:
-            return next_word
+        return next_word
 
     def generate_sequence(self, k, append=False, temperature=1):
         for i in range(k):
             next_word = self.return_next_word(temperature=temperature)
-            # if next_word == self.token2ind["<RECIPE_END>"]:
-            #     break
             self.tokens_ind.append(next_word)
 
-        return_tokens_ind = "".join([self.ind2token[ind] for ind in self.tokens_ind])
+        # if not append:
+        # self.tokens_ind = self.original_tokens_ind.copy()
 
-        if not append:
-            self.tokens_ind = self.prefix.tokens_ind.copy()
-
-        return return_tokens_ind
+        return self.tokenizer.decode(self.tokens_ind)
 
     def bulk_generate_sequence(self, k, n, temperature=1):
         for i in range(n):

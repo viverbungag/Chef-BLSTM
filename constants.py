@@ -1,4 +1,4 @@
-NUMBER_OF_RECIPES = 500000
+NUMBER_OF_RECIPES = 10000
 MODEL_PATH = f"data/out/blstm_model_{NUMBER_OF_RECIPES}_emb_bert_tokenizer_long"
 
 RECIPE_START_TOKEN = "<RECIPE_START>"
