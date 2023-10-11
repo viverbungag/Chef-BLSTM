@@ -90,10 +90,16 @@ class ModelPredict:
 
         return next_word
 
-    def generate_sequence(self, k, append=False, temperature=1):
-        for i in range(k):
+    def generate_sequence(self, temperature=1):
+        counter = 0
+        while True:
             next_word = self.return_next_word(temperature=temperature)
             self.tokens_ind.append(next_word)
+            if "<RECIPE_END>" in self.tokenizer.decode([next_word]):
+                break
+            counter += 1
+            if counter > 500:
+                break
 
         # if not append:
         # self.tokens_ind = self.original_tokens_ind.copy()
